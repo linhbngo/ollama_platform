@@ -1,0 +1,54 @@
+services:
+  base:
+    build:
+      context: ./docker/base
+      tags:
+        - "interactive_book:base"
+    image: interactive_book:base
+    
+  bookcase:
+    build:
+      context: ./docker/bookcase
+      tags:
+        - "bookcase:latest"
+    init: true
+    image: bookcase:latest
+    ports:
+      - "18088:8088" # code-server
+      - "18000:8000" # spare
+      - "30003:3000" # standard nodejs
+      - "2222:22"
+    volumes:
+      - ./home:/home
+      - ../my-book-shelves:/my-book-shelves # This is a github repo containing lecture materials
+    expose:
+      - "22"
+      - "3000"
+      - "8088"
+      - "8000"
+    hostname: bookcase
+    container_name: bookcase
+    networks:
+      - compute
+      
+  compute:
+    init: true
+    image: interactive_book:base
+    volumes:
+      - ./home:/home
+      - ../bookcase:/bookcase # courses is a github repo containing lecture materials
+    expose:
+      - "22"
+    hostname: compute
+    container_name: compute
+    networks:
+      - compute
+    deploy:
+      resources:
+        limits:
+          cpus: 2.0
+      
+networks:
+  compute:
+    name: compute
+    driver: bridge
