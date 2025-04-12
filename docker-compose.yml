@@ -3,52 +3,63 @@ services:
     build:
       context: ./docker/base
       tags:
-        - "interactive_book:base"
-    image: interactive_book:base
+        - "ollama_app:base"
+    image: ollama_app:base
     
-  bookcase:
+  jupyter_ollama:
     build:
-      context: ./docker/bookcase
+      context: ./docker/jupyter
       tags:
-        - "bookcase:latest"
+        - "ollama_jupyter:latest"
     init: true
-    image: bookcase:latest
+    image: ollama_jupyter:latest
     ports:
-      - "18088:8088" # code-server
-      - "18000:8000" # spare
-      - "30003:3000" # standard nodejs
-      - "2222:22"
+      - "18888:8888" # jupyter
     volumes:
-      - ./home:/home
-      - ../my-book-shelves:/my-book-shelves # This is a github repo containing lecture materials
+      - ./workspace:/workspace
     expose:
-      - "22"
-      - "3000"
-      - "8088"
-      - "8000"
-    hostname: bookcase
-    container_name: bookcase
+      - "8888"
+    hostname: jupyter_ollama 
+    container_name: jupyter_ollama
     networks:
       - compute
       
-  compute:
-    init: true
-    image: interactive_book:base
-    volumes:
-      - ./home:/home
-      - ../bookcase:/bookcase # courses is a github repo containing lecture materials
-    expose:
-      - "22"
-    hostname: compute
-    container_name: compute
-    networks:
-      - compute
+  ollama:
+    container_name: ollama
+    image: ollama/ollama
     deploy:
       resources:
-        limits:
-          cpus: 2.0
-      
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: ["gpu"]
+              count: all
+    volumes: # change this to your own external model storage place
+      - //e/data/ollama_models:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_RUN_TIMEOUT: 600
+      OLLAMA_REQUEST_TIMEOUT: 600
+      OLLAMA_LOAD_TIMEOUT: 600
+    networks:
+      - compute
+  # Launch this if there is no GPU or if you are running on Mac
+  ollama-cpu:
+    container_name: ollama
+    image: ollama/ollama
+    volumes:
+      - ../ollama_models:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_RUN_TIMEOUT: 600
+      OLLAMA_REQUEST_TIMEOUT: 600
+      OLLAMA_LOAD_TIMEOUT: 600
+    networks:
+      - compute
+
 networks:
   compute:
-    name: compute
+    name: ollama_net
     driver: bridge
