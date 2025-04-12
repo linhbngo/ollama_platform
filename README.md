@@ -21,7 +21,7 @@ git clone https://github.com/linhbngo/ollama_platform
 ~~~bash
 cd llama-kattis
 docker compose build --no-cache base
-docker compose build --no-cache jupyter
+docker compose build --no-cache jupyter_ollama
 ~~~
 
 ## Confirm GPU availability for Windows
@@ -66,7 +66,7 @@ GPU Device 0: "Ampere" with compute capability 8.6
 - First, launch the `jupyter` container
 
 ~~~bash
-docker compose up -d jupyter
+docker compose up -d jupyter_ollama
 ~~~
 
 - If you are running on Windows with NVidia GPU, run the following:
