@@ -19,7 +19,7 @@ git clone https://github.com/linhbngo/ollama_platform
 - Next, cd into the cloned repo and run the followings. 
 
 ~~~bash
-cd llama-kattis
+cd ollama_platform
 docker compose build --no-cache base
 docker compose build --no-cache jupyter_ollama
 ~~~
