@@ -61,5 +61,5 @@ services:
 
 networks:
   compute:
-    name: ollama_net
+    name: compute
     driver: bridge
